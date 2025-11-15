@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "cantonese-flashcard"
+version = "0.1.0"
+description = "A Cantonese flashcard learning application"
+authors = ["Developer <dev@example.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "3.14.0"
+PyQt5 = "^5.15"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+black = "^23.0"
+flake8 = "^6.1"
+mypy = "^1.0"
+
+[tool.poetry.scripts]
+cantonese-flashcard = "flashcard:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+

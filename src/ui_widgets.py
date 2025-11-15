@@ -1,0 +1,165 @@
+"""UI components for the flashcard application."""
+
+from PyQt5.QtWidgets import QLineEdit, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
+
+
+class InputField(QLineEdit):
+    """Custom QLineEdit for flashcard input."""
+
+    def __init__(self, font: QFont = None, height: int = 50, parent=None):
+        """
+        Initialize InputField.
+        
+        Args:
+            font: QFont for the field
+            height: Fixed height of the field
+            parent: Parent widget
+        """
+        super().__init__(parent)
+        if font:
+            self.setFont(font)
+        self.setAlignment(Qt.AlignCenter)
+        self.setFixedHeight(height)
+
+    def disable(self, value: str):
+        """Disable field and set value."""
+        self.setText(value)
+        self.setEnabled(False)
+        self.setStyleSheet("background-color: #e0e0e0; color: black;")
+
+    def enable(self):
+        """Enable field and clear value."""
+        self.clear()
+        self.setEnabled(True)
+        self.setStyleSheet("")
+
+
+class CardDisplay(QWidget):
+    """Widget for displaying flashcard input fields."""
+
+    def __init__(self, on_check_callback=None, parent=None):
+        """
+        Initialize CardDisplay.
+        
+        Args:
+            on_check_callback: Callback function for Check button
+            parent: Parent widget
+        """
+        super().__init__(parent)
+        self.on_check = on_check_callback
+        self.init_ui()
+
+    def init_ui(self):
+        """Initialize UI components."""
+        font_char = QFont("Noto Sans CJK HK", 24)
+        font_jyut = QFont("DejaVu Sans", 18)
+        font_eng = QFont("DejaVu Sans", 18)
+
+        lbl_char = QLabel("Chinese Character:")
+        lbl_jyut = QLabel("Jyutping:")
+        lbl_eng = QLabel("English:")
+
+        self.char_input = InputField(font_char, 60)
+        self.char_input.returnPressed.connect(self.on_check)
+
+        self.jyut_input = InputField(font_jyut, 50)
+        self.jyut_input.returnPressed.connect(self.on_check)
+
+        self.eng_input = InputField(font_eng, 50)
+        self.eng_input.returnPressed.connect(self.on_check)
+
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(40, 30, 40, 30)
+
+        for label, edit in [
+            (lbl_char, self.char_input),
+            (lbl_jyut, self.jyut_input),
+            (lbl_eng, self.eng_input)
+        ]:
+            hbox = QHBoxLayout()
+            hbox.addWidget(label)
+            hbox.addWidget(edit, 1)
+            layout.addLayout(hbox)
+
+        self.setLayout(layout)
+
+    def get_inputs(self) -> dict:
+        """Get current input values."""
+        return {
+            'char': self.char_input.text().strip(),
+            'jyut': self.jyut_input.text().strip(),
+            'eng': self.eng_input.text().strip()
+        }
+
+    def reset_inputs(self):
+        """Reset all input fields."""
+        for field in [self.char_input, self.jyut_input, self.eng_input]:
+            field.enable()
+
+    def set_quiz_mode(self, mode: str, card: dict):
+        """
+        Set quiz mode by disabling one field and enabling others.
+        
+        Args:
+            mode: Quiz mode ('char', 'jyut', or 'eng')
+            card: Card dictionary with word data
+        """
+        self.reset_inputs()
+
+        if mode == 'char':
+            self.char_input.disable(card['char'])
+            self.jyut_input.setFocus()
+        elif mode == 'jyut':
+            self.jyut_input.disable(card['jyut'])
+            self.char_input.setFocus()
+        else:  # eng
+            self.eng_input.disable(card['eng'].title())
+            self.char_input.setFocus()
+
+        # Focus first enabled field
+        for field in [self.char_input, self.jyut_input, self.eng_input]:
+            if field.isEnabled():
+                field.setFocus()
+                break
+
+
+class ControlButtons(QWidget):
+    """Widget for control buttons."""
+
+    def __init__(self, on_check_callback=None, on_next_callback=None, parent=None):
+        """
+        Initialize ControlButtons.
+        
+        Args:
+            on_check_callback: Callback for Check Answer button
+            on_next_callback: Callback for Next Card button
+            parent: Parent widget
+        """
+        super().__init__(parent)
+        self.init_ui(on_check_callback, on_next_callback)
+
+    def init_ui(self, on_check, on_next):
+        """Initialize UI components."""
+        self.btn_check = QPushButton("Check Answer")
+        self.btn_check.setStyleSheet(
+            "background-color: #4CAF50; color: white; font-size: 14pt; padding: 10px;"
+        )
+        if on_check:
+            self.btn_check.clicked.connect(on_check)
+
+        self.btn_next = QPushButton("Next Card")
+        self.btn_next.setStyleSheet("font-size: 12pt; padding: 8px;")
+        if on_next:
+            self.btn_next.clicked.connect(on_next)
+
+        layout = QHBoxLayout()
+        layout.addStretch()
+        layout.addWidget(self.btn_check)
+        layout.addWidget(self.btn_next)
+        layout.addStretch()
+        layout.setContentsMargins(0, 20, 0, 0)
+
+        self.setLayout(layout)

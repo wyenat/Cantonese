@@ -139,3 +139,37 @@ class DataManager:
             # Return English with all alternatives
             return word['eng'].upper()  # Display in original case
         return ""
+
+    def get_types(self) -> List[str]:
+        """
+        Get all unique types from loaded words.
+        
+        Returns:
+            Sorted list of unique types (excluding empty strings)
+        """
+        types_set = set()
+        for word in self.words:
+            word_type = word.get('type', '').strip()
+            if word_type:  # Only include non-empty types
+                types_set.add(word_type)
+        return sorted(list(types_set))
+
+    def filter_words_by_types(self, selected_types: List[str]) -> List[Dict[str, Any]]:
+        """
+        Filter words based on selected types.
+        
+        Args:
+            selected_types: List of selected type strings
+        
+        Returns:
+            Filtered list of words
+        """
+        if not selected_types:
+            return []
+        
+        filtered = []
+        for word in self.words:
+            word_type = word.get('type', '').strip()
+            if word_type in selected_types:
+                filtered.append(word)
+        return filtered

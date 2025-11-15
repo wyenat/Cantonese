@@ -1,8 +1,8 @@
 """UI components for the flashcard application."""
 
-from PyQt5.QtWidgets import QLineEdit, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QLineEdit, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox, QGroupBox
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 
 
 class InputField(QLineEdit):
@@ -124,6 +124,55 @@ class CardDisplay(QWidget):
             if field.isEnabled():
                 field.setFocus()
                 break
+
+
+class TypeFilter(QGroupBox):
+    """Widget for filtering flashcards by type."""
+
+    # Signal emitted when filter selection changes
+    filter_changed = pyqtSignal(list)
+
+    def __init__(self, types: list, on_filter_changed=None, parent=None):
+        """
+        Initialize TypeFilter.
+        
+        Args:
+            types: List of available types
+            on_filter_changed: Callback function when filter changes
+            parent: Parent widget
+        """
+        super().__init__("Card Types", parent)
+        self.types = types
+        self.checkboxes = {}
+        self.on_filter_changed = on_filter_changed
+        self.init_ui()
+
+    def init_ui(self):
+        """Initialize UI components."""
+        layout = QHBoxLayout()
+        layout.setSpacing(10)
+        layout.setContentsMargins(10, 10, 10, 10)
+
+        for card_type in self.types:
+            checkbox = QCheckBox(card_type)
+            checkbox.setChecked(True)  # All types selected by default
+            checkbox.stateChanged.connect(self.on_checkbox_changed)
+            self.checkboxes[card_type] = checkbox
+            layout.addWidget(checkbox)
+
+        layout.addStretch()
+        self.setLayout(layout)
+
+    def on_checkbox_changed(self):
+        """Handle checkbox state change."""
+        selected = self.get_selected_types()
+        if self.on_filter_changed:
+            self.on_filter_changed(selected)
+        self.filter_changed.emit(selected)
+
+    def get_selected_types(self) -> list:
+        """Get list of currently selected types."""
+        return [card_type for card_type, checkbox in self.checkboxes.items() if checkbox.isChecked()]
 
 
 class ControlButtons(QWidget):

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 
 from .data_manager import DataManager
 from .card_logic import CardLogic
-from .ui_widgets import CardDisplay, ControlButtons
+from .ui_widgets import CardDisplay, ControlButtons, TypeFilter
 
 
 MAX_CARDS = 10
@@ -26,6 +26,8 @@ class FlashcardApp(QWidget):
         self.card_logic = None
         self.card_count = 0
         self.current_mode = None
+        self.filtered_words = []
+        self.selected_types = []
 
         # Load data
         if not self.data_manager.load_csv():
@@ -36,15 +38,30 @@ class FlashcardApp(QWidget):
             QMessageBox.warning(self, "No Data", "No words found in CSV file")
             return
 
-        self.card_logic = CardLogic(self.data_manager.get_words())
+        # Get available types
+        available_types = self.data_manager.get_types()
+        if not available_types:
+            QMessageBox.warning(self, "No Types", "No card types found in CSV file")
+            return
+
+        # Initialize with all types
+        self.selected_types = available_types
+        self.filtered_words = self.data_manager.filter_words_by_types(self.selected_types)
+
+        self.card_logic = CardLogic(self.filtered_words)
+        self.available_types = available_types
         self.init_ui()
 
     def init_ui(self):
         """Initialize UI."""
         self.setWindowTitle("Cantonese Flashcard - Enter to Check")
-        self.resize(750, 520)
+        self.resize(750, 600)
 
         # Create widgets
+        self.type_filter = TypeFilter(
+            self.available_types,
+            on_filter_changed=self.on_filter_changed
+        )
         self.card_display = CardDisplay(on_check_callback=self.check)
         self.buttons = ControlButtons(
             on_check_callback=self.check,
@@ -53,11 +70,33 @@ class FlashcardApp(QWidget):
 
         # Layout
         layout = QVBoxLayout()
+        layout.addWidget(self.type_filter)
         layout.addWidget(self.card_display, 1)
         layout.addWidget(self.buttons)
         self.setLayout(layout)
 
         # Start first card
+        self.new_card()
+
+    def on_filter_changed(self, selected_types):
+        """Handle filter change."""
+        self.selected_types = selected_types
+        
+        if not selected_types:
+            QMessageBox.warning(self, "No Selection", "Please select at least one card type")
+            # Reset to previous selection
+            return
+        
+        # Filter words and update card logic
+        self.filtered_words = self.data_manager.filter_words_by_types(selected_types)
+        
+        if not self.filtered_words:
+            QMessageBox.warning(self, "No Cards", "No cards available for selected types")
+            return
+        
+        self.card_logic = CardLogic(self.filtered_words)
+        self.card_count = 0
+        self.update_title()
         self.new_card()
 
     def new_card(self):

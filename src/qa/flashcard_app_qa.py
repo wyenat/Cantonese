@@ -6,6 +6,9 @@ import re
 
 # Chinese regex used by the TTS generator
 CHINESE_RE = re.compile(r'[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]+')
+import threading
+import shutil
+import subprocess
 
 from ..common.ui_widgets import InputField, ControlButtons
 from .data_manager_qa import DataManagerQA
@@ -162,6 +165,44 @@ class FlashcardQAApp(QWidget):
         safe = self.safe_name(text)
         return Path('resources') / 'audio' / f"{safe}.wav"
 
+    def generate_audio_and_play(self, text: str):
+        """Ensure audio exists for text: generate via ekho in background if missing and play when ready."""
+        if not text:
+            QMessageBox.warning(self, "No Audio", "Empty text")
+            return
+
+        out_path = self.get_audio_path_for_text(text)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if out_path.exists():
+            try:
+                QSound.play(str(out_path))
+            except Exception as e:
+                QMessageBox.warning(self, "Playback Error", str(e))
+            return
+
+        # Need to generate. Check ekho availability
+        if not shutil.which('ekho'):
+            QMessageBox.warning(self, "Missing ekho", "ekho command not found on PATH; cannot synthesize audio")
+            return
+
+        def worker():
+            cmd = ['ekho', '-v', 'Cantonese', '-o', str(out_path), text]
+            try:
+                subprocess.run(cmd, check=True)
+                # play the generated file
+                try:
+                    QSound.play(str(out_path))
+                except Exception:
+                    pass
+            except Exception as e:
+                print('ekho generation failed:', e)
+
+        # Inform user and start background generation
+        QMessageBox.information(self, "Generating audio", f"Generating audio for: {text}")
+        t = threading.Thread(target=worker, daemon=True)
+        t.start()
+
     def play_field_audio(self, field: InputField):
         # Deprecated: field playback is not used. Keep for compatibility.
         text = field.text().strip()
@@ -187,25 +228,12 @@ class FlashcardQAApp(QWidget):
         if not text:
             QMessageBox.warning(self, "No Audio", f"No expected text for {key}")
             return
-        p = self.get_audio_path_for_text(text)
-        if not p.exists():
-            QMessageBox.warning(self, "No Audio", f"Audio not found: {p}")
-            return
-        try:
-            QSound.play(str(p))
-        except Exception as e:
-            QMessageBox.warning(self, "Playback Error", str(e))
+        # Generate on-demand and play (will run ekho in background if missing)
+        self.generate_audio_and_play(text)
 
     def play_prompt_audio(self):
         txt = getattr(self, 'current_prompt_val', '')
         if not txt:
             QMessageBox.warning(self, "No Audio", "No prompt audio available")
             return
-        p = self.get_audio_path_for_text(txt)
-        if not p.exists():
-            QMessageBox.warning(self, "No Audio", f"Audio not found: {p}")
-            return
-        try:
-            QSound.play(str(p))
-        except Exception as e:
-            QMessageBox.warning(self, "Playback Error", str(e))
+        self.generate_audio_and_play(txt)

@@ -1,10 +1,10 @@
-"""Main flashcard application window."""
+"""Main flashcard application window (original app)."""
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 
-from .data_manager import DataManager
-from .card_logic import CardLogic
-from .ui_widgets import CardDisplay, ControlButtons, TypeFilter
+from ..common.ui_widgets import CardDisplay, ControlButtons, TypeFilter
+from ..common.data_manager import DataManager
+from ..common.card_logic import CardLogic
 
 
 MAX_CARDS = 10
@@ -14,12 +14,6 @@ class FlashcardApp(QWidget):
     """Main flashcard application."""
 
     def __init__(self, csv_file: str):
-        """
-        Initialize FlashcardApp.
-        
-        Args:
-            csv_file: Path to the CSV file
-        """
         super().__init__()
         self.csv_file = csv_file
         self.data_manager = DataManager(csv_file)
@@ -29,7 +23,6 @@ class FlashcardApp(QWidget):
         self.filtered_words = []
         self.selected_types = []
 
-        # Load data
         if not self.data_manager.load_csv():
             QMessageBox.critical(self, "Error", "Failed to load CSV file")
             return
@@ -38,13 +31,11 @@ class FlashcardApp(QWidget):
             QMessageBox.warning(self, "No Data", "No words found in CSV file")
             return
 
-        # Get available types
         available_types = self.data_manager.get_types()
         if not available_types:
             QMessageBox.warning(self, "No Types", "No card types found in CSV file")
             return
 
-        # Initialize with all types
         self.selected_types = available_types
         self.filtered_words = self.data_manager.filter_words_by_types(self.selected_types)
 
@@ -53,11 +44,9 @@ class FlashcardApp(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        """Initialize UI."""
         self.setWindowTitle("Cantonese Flashcard - Enter to Check")
         self.resize(750, 600)
 
-        # Create widgets
         self.type_filter = TypeFilter(
             self.available_types,
             on_filter_changed=self.on_filter_changed
@@ -68,39 +57,33 @@ class FlashcardApp(QWidget):
             on_next_callback=self.new_card
         )
 
-        # Layout
         layout = QVBoxLayout()
         layout.addWidget(self.type_filter)
         layout.addWidget(self.card_display, 1)
         layout.addWidget(self.buttons)
         self.setLayout(layout)
 
-        # Start first card
         self.new_card()
 
     def on_filter_changed(self, selected_types):
-        """Handle filter change."""
         self.selected_types = selected_types
-        
+
         if not selected_types:
             QMessageBox.warning(self, "No Selection", "Please select at least one card type")
-            # Reset to previous selection
             return
-        
-        # Filter words and update card logic
+
         self.filtered_words = self.data_manager.filter_words_by_types(selected_types)
-        
+
         if not self.filtered_words:
             QMessageBox.warning(self, "No Cards", "No cards available for selected types")
             return
-        
+
         self.card_logic = CardLogic(self.filtered_words)
         self.card_count = 0
         self.update_title()
         self.new_card()
 
     def new_card(self):
-        """Load a new flashcard."""
         if self.card_count >= MAX_CARDS:
             self.ask_continue()
             return
@@ -117,11 +100,9 @@ class FlashcardApp(QWidget):
         self.update_title()
 
     def update_title(self):
-        """Update window title with card count."""
         self.setWindowTitle(f"Cantonese Flashcard - Card {self.card_count}/{MAX_CARDS}")
 
     def check(self):
-        """Check user's answer."""
         if not self.card_logic.current:
             return
 
@@ -135,14 +116,12 @@ class FlashcardApp(QWidget):
         else:
             QMessageBox.warning(self, "Try Again", message)
 
-        # Go to next card
         if self.card_count < MAX_CARDS:
             self.new_card()
         else:
             self.ask_continue()
 
     def ask_continue(self):
-        """Ask user if they want to continue with another 10 cards."""
         reply = QMessageBox.question(
             self, "Session Complete",
             f"You've done {MAX_CARDS} cards!\n\nContinue with another {MAX_CARDS}?",

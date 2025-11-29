@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """
-Cantonese Flashcard Application
-Main entry point
+QA style Cantonese flashcard app runner
 """
-
 import sys
 import os
 from PyQt5.QtWidgets import QApplication
@@ -11,19 +9,18 @@ from PyQt5.QtWidgets import QApplication
 # Add src to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.flashcards.flashcard_app import FlashcardApp
+from src.qa.flashcard_app_qa import FlashcardQAApp
 
 
 def main():
-    """Main entry point."""
-    csv_file = 'resources/flashcard/cantonese.csv' if len(sys.argv) < 2 else sys.argv[1]
-    
+    csv_file = 'resources/qa/cantonese-QA.csv' if len(sys.argv) < 2 else sys.argv[1]
+
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    
-    window = FlashcardApp(csv_file)
+
+    window = FlashcardQAApp(csv_file)
     window.show()
-    
+
     sys.exit(app.exec_())
 
 

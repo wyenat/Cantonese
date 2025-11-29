@@ -1,4 +1,4 @@
-"""Core logic for flashcard operations."""
+"""Core logic for flashcard operations (common)."""
 
 import random
 from typing import List, Dict, Any, Tuple
@@ -8,23 +8,11 @@ class CardLogic:
     """Handles flashcard game logic and answer checking."""
 
     def __init__(self, words: List[Dict[str, Any]]):
-        """
-        Initialize CardLogic with word list.
-        
-        Args:
-            words: List of word dictionaries
-        """
         self.words = words
         self.current = None
         self.current_idx = -1
 
     def get_random_card(self) -> Dict[str, Any]:
-        """
-        Select a random card and return it with a quiz mode.
-        
-        Returns:
-            Dictionary with 'card', 'mode', and 'question' keys
-        """
         if not self.words:
             return None
 
@@ -32,7 +20,6 @@ class CardLogic:
         self.current = self.words[self.current_idx]
         mode = random.choice(['char', 'jyut', 'eng'])
 
-        # Increment Questioned counter
         self.current['q'] += 1
         self.current['_row']['Questioned'] = str(self.current['q'])
 
@@ -42,16 +29,6 @@ class CardLogic:
         }
 
     def check_answer(self, mode: str, user_inputs: Dict[str, str]) -> Tuple[bool, str]:
-        """
-        Check user's answer against expected values.
-        
-        Args:
-            mode: Quiz mode ('char', 'jyut', or 'eng')
-            user_inputs: Dictionary with 'char', 'jyut', 'eng' keys and user responses
-        
-        Returns:
-            Tuple of (is_correct, message)
-        """
         if not self.current:
             return False, "No card loaded"
 

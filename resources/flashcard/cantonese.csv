@@ -1,59 +1,59 @@
 Word,Jyutping,English,Questioned,Correct,Type
 我,ngo5,I/ME,4,2,Pronouns
-你,nei5,YOU,7,5,Pronouns
+你,nei5,YOU,8,6,Pronouns
 佢,keoi5,HE/SHE/IT,3,2,Pronouns
-哋,dei6,PLURAL,2,2,Pronouns
-唔,m4,NOT,2,2,Basics
-係,hai6,IS/ARE,1,1,Basics
-啲,di1,SOME,2,1,Basics
-嘅,ge3,'S,0,0,Basics
+哋,dei6,PLURAL,4,4,Pronouns
+唔,m4,NOT,4,3,Basics
+係,hai6,IS/ARE,2,1,Basics
+啲,di1,SOME,3,1,Basics
+嘅,ge3,'S,1,0,Basics
 一,jat1,ONE,4,4,Numbers
-二,ji6,TWO,2,1,Numbers
-三,saam1,THREE,2,2,Numbers
+二,ji6,TWO,3,1,Numbers
+三,saam1,THREE,3,3,Numbers
 四,sei3,FOUR,0,0,Numbers
 五,ng5,FIVE,2,2,Numbers
 六,luk6,SIX,2,2,Numbers
 七,cat1,SEVEN,3,3,Numbers
 八,baat3,EIGHT,3,2,Numbers
-九,gau2,NINE,2,2,Numbers
+九,gau2,NINE,4,4,Numbers
 十,sap6,TEN,3,3,Numbers
-百,baak3,HUNDRED,3,1,Numbers
+百,baak3,HUNDRED,4,2,Numbers
 千,cin1,THOUSAND,5,5,Numbers
-萬,maan6,TEN THOUSAND,1,0,Numbers
-零,ling4,ZERO,2,1,Numbers
-咁,gam3,SO/THUS,1,1,Basics
+萬,maan6,TEN THOUSAND,3,0,Numbers
+零,ling4,ZERO,4,3,Numbers
+咁,gam3,SO/THUS,3,2,Basics
 嬲,nau1,ANGRY,5,4,Adjectives
 乜,mat1,WHAT,5,5,Basics
 睇,tai2,LOOK/WATCH,3,2,Verbs
 國,gwok3,COUNTRY,3,3,Nouns
 嚟,lai4,COME,2,1,Verbs
 法,faat3,LAW/METHOD,2,2,Nouns
-㝵,zyu6,SLEEP/REST,0,0,Verbs
-冇,mou5,NOT HAVE/NO,3,1,Verbs
-諗,nam2,THINK/PONDER,4,0,Verbs
-㗎,gaa3,FINAL PARTICLE,4,0,Particles
+㝵,zyu6,SLEEP/REST,1,0,Verbs
+冇,mou5,NOT HAVE/NO,4,1,Verbs
+諗,nam2,THINK/PONDER,5,0,Verbs
+㗎,gaa3,FINAL PARTICLE,7,2,Particles
 咩,me1,WHAT,0,0,Basics
-乸,naa2,FEMALE ANIMAL,3,1,Nouns
+乸,naa2,FEMALE ANIMAL,4,1,Nouns
 撩,liu1,TEASE/PROVOKE/STIR,2,0,Verbs
-拎,ling1,TAKE/CARRY/HOLD,2,0,Verbs
+拎,ling1,TAKE/CARRY/HOLD,3,0,Verbs
 啖,daam6,MOUTHFUL/PIECE,1,0,Nouns
 氹,tam5,COAX/PERSUADE,2,1,Verbs
-食,sik6,EAT/CONSUME,2,0,Verbs
+食,sik6,EAT/CONSUME,3,0,Verbs
 飲,jam2,DRINK,3,2,Verbs
 行,haang4,WALK/GO,2,0,Verbs
 坐,zo2,SIT,4,1,Verbs
 瞓,fan3,SLEEP,1,0,Verbs
-講,gong2,SPEAK/SAY/TALK,6,3,Verbs
-聽,ting1,LISTEN/HEAR,0,0,Verbs
-睇,tai2,LOOK/WATCH/SEE,3,3,Verbs
-買,maai5,BUY,0,0,Verbs
-賣,maai6,SELL,1,1,Verbs
-畀,bei2,GIVE/PASS,1,0,Verbs
+講,gong2,SPEAK/SAY/TALK,7,4,Verbs
+聽,ting1,LISTEN/HEAR,1,0,Verbs
+睇,tai2,LOOK/WATCH/SEE,4,4,Verbs
+買,maai5,BUY,2,0,Verbs
+賣,maai6,SELL,2,1,Verbs
+畀,bei2,GIVE/PASS,2,0,Verbs
 攞,lo2,TAKE/GET,0,0,Verbs
-知,zi1,KNOW,1,0,Verbs
+知,zi1,KNOW,2,0,Verbs
 識,sik1,KNOW/RECOGNIZE,0,0,Verbs
 好,hau2,GOOD/NICE/WELL,4,0,Adjectives
 左,zo2,LEFT,1,1,Adjectives
-有,jau5,HAVE,1,0,Verbs
+有,jau5,HAVE,2,1,Verbs
 右,jau6,RIGHT,1,0,Adjectives
 石,sek6,STONE/ROCK,2,2,Nouns

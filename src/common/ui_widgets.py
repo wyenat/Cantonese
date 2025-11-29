@@ -1,4 +1,4 @@
-"""UI components for the flashcard application."""
+"""UI components for the flashcard application (shared)."""
 
 from PyQt5.QtWidgets import QLineEdit, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox, QGroupBox
 from PyQt5.QtGui import QFont
@@ -9,14 +9,6 @@ class InputField(QLineEdit):
     """Custom QLineEdit for flashcard input."""
 
     def __init__(self, font: QFont = None, height: int = 50, parent=None):
-        """
-        Initialize InputField.
-        
-        Args:
-            font: QFont for the field
-            height: Fixed height of the field
-            parent: Parent widget
-        """
         super().__init__(parent)
         if font:
             self.setFont(font)
@@ -24,13 +16,11 @@ class InputField(QLineEdit):
         self.setFixedHeight(height)
 
     def disable(self, value: str):
-        """Disable field and set value."""
         self.setText(value)
         self.setEnabled(False)
         self.setStyleSheet("background-color: #e0e0e0; color: black;")
 
     def enable(self):
-        """Enable field and clear value."""
         self.clear()
         self.setEnabled(True)
         self.setStyleSheet("")
@@ -40,19 +30,11 @@ class CardDisplay(QWidget):
     """Widget for displaying flashcard input fields."""
 
     def __init__(self, on_check_callback=None, parent=None):
-        """
-        Initialize CardDisplay.
-        
-        Args:
-            on_check_callback: Callback function for Check button
-            parent: Parent widget
-        """
         super().__init__(parent)
         self.on_check = on_check_callback
         self.init_ui()
 
     def init_ui(self):
-        """Initialize UI components."""
         font_char = QFont("Noto Sans CJK HK", 24)
         font_jyut = QFont("DejaVu Sans", 18)
         font_eng = QFont("DejaVu Sans", 18)
@@ -62,13 +44,16 @@ class CardDisplay(QWidget):
         lbl_eng = QLabel("English:")
 
         self.char_input = InputField(font_char, 60)
-        self.char_input.returnPressed.connect(self.on_check)
+        if self.on_check:
+            self.char_input.returnPressed.connect(self.on_check)
 
         self.jyut_input = InputField(font_jyut, 50)
-        self.jyut_input.returnPressed.connect(self.on_check)
+        if self.on_check:
+            self.jyut_input.returnPressed.connect(self.on_check)
 
         self.eng_input = InputField(font_eng, 50)
-        self.eng_input.returnPressed.connect(self.on_check)
+        if self.on_check:
+            self.eng_input.returnPressed.connect(self.on_check)
 
         layout = QVBoxLayout()
         layout.setSpacing(15)
@@ -87,7 +72,6 @@ class CardDisplay(QWidget):
         self.setLayout(layout)
 
     def get_inputs(self) -> dict:
-        """Get current input values."""
         return {
             'char': self.char_input.text().strip(),
             'jyut': self.jyut_input.text().strip(),
@@ -95,18 +79,10 @@ class CardDisplay(QWidget):
         }
 
     def reset_inputs(self):
-        """Reset all input fields."""
         for field in [self.char_input, self.jyut_input, self.eng_input]:
             field.enable()
 
     def set_quiz_mode(self, mode: str, card: dict):
-        """
-        Set quiz mode by disabling one field and enabling others.
-        
-        Args:
-            mode: Quiz mode ('char', 'jyut', or 'eng')
-            card: Card dictionary with word data
-        """
         self.reset_inputs()
 
         if mode == 'char':
@@ -119,7 +95,6 @@ class CardDisplay(QWidget):
             self.eng_input.disable(card['eng'].title())
             self.char_input.setFocus()
 
-        # Focus first enabled field
         for field in [self.char_input, self.jyut_input, self.eng_input]:
             if field.isEnabled():
                 field.setFocus()
@@ -129,18 +104,9 @@ class CardDisplay(QWidget):
 class TypeFilter(QGroupBox):
     """Widget for filtering flashcards by type."""
 
-    # Signal emitted when filter selection changes
     filter_changed = pyqtSignal(list)
 
     def __init__(self, types: list, on_filter_changed=None, parent=None):
-        """
-        Initialize TypeFilter.
-        
-        Args:
-            types: List of available types
-            on_filter_changed: Callback function when filter changes
-            parent: Parent widget
-        """
         super().__init__("Card Types", parent)
         self.types = types
         self.checkboxes = {}
@@ -148,14 +114,13 @@ class TypeFilter(QGroupBox):
         self.init_ui()
 
     def init_ui(self):
-        """Initialize UI components."""
         layout = QHBoxLayout()
         layout.setSpacing(10)
         layout.setContentsMargins(10, 10, 10, 10)
 
         for card_type in self.types:
             checkbox = QCheckBox(card_type)
-            checkbox.setChecked(True)  # All types selected by default
+            checkbox.setChecked(True)
             checkbox.stateChanged.connect(self.on_checkbox_changed)
             self.checkboxes[card_type] = checkbox
             layout.addWidget(checkbox)
@@ -164,14 +129,12 @@ class TypeFilter(QGroupBox):
         self.setLayout(layout)
 
     def on_checkbox_changed(self):
-        """Handle checkbox state change."""
         selected = self.get_selected_types()
         if self.on_filter_changed:
             self.on_filter_changed(selected)
         self.filter_changed.emit(selected)
 
     def get_selected_types(self) -> list:
-        """Get list of currently selected types."""
         return [card_type for card_type, checkbox in self.checkboxes.items() if checkbox.isChecked()]
 
 
@@ -179,19 +142,10 @@ class ControlButtons(QWidget):
     """Widget for control buttons."""
 
     def __init__(self, on_check_callback=None, on_next_callback=None, parent=None):
-        """
-        Initialize ControlButtons.
-        
-        Args:
-            on_check_callback: Callback for Check Answer button
-            on_next_callback: Callback for Next Card button
-            parent: Parent widget
-        """
         super().__init__(parent)
         self.init_ui(on_check_callback, on_next_callback)
 
     def init_ui(self, on_check, on_next):
-        """Initialize UI components."""
         self.btn_check = QPushButton("Check Answer")
         self.btn_check.setStyleSheet(
             "background-color: #4CAF50; color: white; font-size: 14pt; padding: 10px;"

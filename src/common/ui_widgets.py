@@ -1,8 +1,10 @@
 """UI components for the flashcard application (shared)."""
 
-from PyQt5.QtWidgets import QLineEdit, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox, QGroupBox
+from PyQt5.QtWidgets import QLineEdit, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox, QGroupBox, QMessageBox
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtMultimedia import QSound
+from pathlib import Path
 
 
 class InputField(QLineEdit):
@@ -59,8 +61,21 @@ class CardDisplay(QWidget):
         layout.setSpacing(15)
         layout.setContentsMargins(40, 30, 40, 30)
 
+        # Chinese row: include a listen button next to the input
+        hbox_char = QHBoxLayout()
+        hbox_char.addWidget(lbl_char)
+        # place input and listen button together
+        char_container = QHBoxLayout()
+        char_container.addWidget(self.char_input, 1)
+        self.listen_button = QPushButton("Listen")
+        self.listen_button.setFixedWidth(90)
+        self.listen_button.clicked.connect(self.on_listen_clicked)
+        self.listen_button.hide()
+        char_container.addWidget(self.listen_button)
+        hbox_char.addLayout(char_container, 1)
+        layout.addLayout(hbox_char)
+
         for label, edit in [
-            (lbl_char, self.char_input),
             (lbl_jyut, self.jyut_input),
             (lbl_eng, self.eng_input)
         ]:
@@ -81,6 +96,25 @@ class CardDisplay(QWidget):
     def reset_inputs(self):
         for field in [self.char_input, self.jyut_input, self.eng_input]:
             field.enable()
+        self.listen_button.hide()
+
+    def get_audio_path(self, text: str) -> Path:
+        """Return the expected audio file path for a given Chinese text."""
+        safe_name = ''.join(ch if ch.isalnum() else '_' for ch in text)
+        return Path('resources') / 'audio' / f"{safe_name}.wav"
+
+    def on_listen_clicked(self):
+        text = self.char_input.text().strip()
+        if not text:
+            return
+        audio_path = self.get_audio_path(text)
+        if not audio_path.exists():
+            QMessageBox.warning(self, "No Audio", f"Audio file not found: {audio_path}")
+            return
+        try:
+            QSound.play(str(audio_path))
+        except Exception as e:
+            QMessageBox.warning(self, "Playback Error", f"Failed to play audio: {e}")
 
     def set_quiz_mode(self, mode: str, card: dict):
         self.reset_inputs()
@@ -88,6 +122,11 @@ class CardDisplay(QWidget):
         if mode == 'char':
             self.char_input.disable(card['char'])
             self.jyut_input.setFocus()
+            # show listen button when char is present
+            if card.get('char'):
+                self.listen_button.show()
+            else:
+                self.listen_button.hide()
         elif mode == 'jyut':
             self.jyut_input.disable(card['jyut'])
             self.char_input.setFocus()

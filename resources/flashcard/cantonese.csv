@@ -22,7 +22,7 @@ Word,Jyutping,English,Questioned,Correct,Type
 萬,maan6,TEN THOUSAND,3,0,Numbers
 零,ling4,ZERO,4,3,Numbers
 咁,gam3,SO/THUS,3,2,Basics
-嬲,nau1,ANGRY,5,4,Adjectives
+嬲,nau1,ANGRY,6,5,Adjectives
 乜,mat1,WHAT,5,5,Basics
 睇,tai2,LOOK/WATCH,3,2,Verbs
 國,gwok3,COUNTRY,3,3,Nouns
@@ -38,21 +38,21 @@ Word,Jyutping,English,Questioned,Correct,Type
 拎,ling1,TAKE/CARRY/HOLD,3,0,Verbs
 啖,daam6,MOUTHFUL/PIECE,1,0,Nouns
 氹,tam5,COAX/PERSUADE,2,1,Verbs
-食,sik6,EAT/CONSUME,3,0,Verbs
-飲,jam2,DRINK,3,2,Verbs
+食,sik6,EAT/CONSUME,4,1,Verbs
+飲,jam2,DRINK,4,2,Verbs
 行,haang4,WALK/GO,2,0,Verbs
 坐,zo2,SIT,4,1,Verbs
 瞓,fan3,SLEEP,1,0,Verbs
 講,gong2,SPEAK/SAY/TALK,7,4,Verbs
 聽,ting1,LISTEN/HEAR,1,0,Verbs
 睇,tai2,LOOK/WATCH/SEE,4,4,Verbs
-買,maai5,BUY,2,0,Verbs
+買,maai5,BUY,4,1,Verbs
 賣,maai6,SELL,2,1,Verbs
 畀,bei2,GIVE/PASS,2,0,Verbs
 攞,lo2,TAKE/GET,0,0,Verbs
 知,zi1,KNOW,2,0,Verbs
 識,sik1,KNOW/RECOGNIZE,0,0,Verbs
-好,hau2,GOOD/NICE/WELL,4,0,Adjectives
+好,hau2,GOOD/NICE/WELL,5,0,Adjectives
 左,zo2,LEFT,1,1,Adjectives
 有,jau5,HAVE,2,1,Verbs
 右,jau6,RIGHT,1,0,Adjectives

@@ -6,11 +6,33 @@ from typing import List, Dict, Any
 
 
 class DataManagerQA:
-    """Loads simple QA CSV with question and answer columns."""
+    """Loads QA CSV with six possible fields per row.
+
+    The CSV may have slightly different header names. This loader attempts
+    to map fields containing keywords to the canonical keys:
+    ChineseQ, JyutpingQ, EnglishQ, ChineseA, JyutpingA, EnglishA
+    """
+
+    CANONICAL_KEYS = [
+        'ChineseQ', 'JyutpingQ', 'EnglishQ',
+        'ChineseA', 'JyutpingA', 'EnglishA'
+    ]
 
     def __init__(self, csv_file: str):
         self.csv_file = csv_file
         self.cards: List[Dict[str, Any]] = []
+
+    def _find_field(self, fieldnames, keyword):
+        """Find a field name in fieldnames that contains the keyword (case-insensitive).
+        Returns None if not found.
+        """
+        if not fieldnames:
+            return None
+        key_l = keyword.lower()
+        for f in fieldnames:
+            if f and key_l in f.lower():
+                return f
+        return None
 
     def load_csv(self) -> bool:
         if not os.path.exists(self.csv_file):
@@ -20,12 +42,34 @@ class DataManagerQA:
         try:
             with open(self.csv_file, encoding='utf-8') as f:
                 reader = csv.DictReader(f)
-                for row in reader:
-                    q = (row.get('ChineseQ') or '').strip()
-                    jq = (row.get('JyutpingQ，EnglishQ') or '').strip()
-                    a = (row.get('ChineseA') or '').strip()
-                    ja = (row.get('JyutpingA，EnglishA') or '').strip()
+                fieldnames = reader.fieldnames or []
 
+                # Map canonical keys to actual CSV columns (if present)
+                mapping = {}
+                for k in self.CANONICAL_KEYS:
+                    found = self._find_field(fieldnames, k)
+                    mapping[k] = found
+                # Determine field order based on CSV header order where possible
+                field_order = []
+                for f in fieldnames:
+                    # try to map this header to a canonical key
+                    for k in self.CANONICAL_KEYS:
+                        if mapping.get(k) and mapping[k] == f and k not in field_order:
+                            field_order.append(k)
+                # append any missing canonical keys at the end in default order
+                for k in self.CANONICAL_KEYS:
+                    if k not in field_order:
+                        field_order.append(k)
+                self.field_order = field_order
+
+                for row in reader:
+                    # Build card with canonical keys
+                    card = {'_row': row}
+                    for k in self.CANONICAL_KEYS:
+                        col = mapping.get(k)
+                        card[k] = (row.get(col) or '').strip() if col else ''
+
+                    # Counters
                     try:
                         questioned_val = int(row.get('Questioned') or 0)
                     except Exception:
@@ -35,18 +79,14 @@ class DataManagerQA:
                     except Exception:
                         correct_val = 0
 
-                    if not q and not jq:
+                    card['questioned'] = questioned_val
+                    card['correct'] = correct_val
+
+                    # Skip rows without any question content
+                    if not any(card[k] for k in ['ChineseQ', 'JyutpingQ', 'EnglishQ']):
                         continue
 
-                    self.cards.append({
-                        'q_text': q,
-                        'q_jyut': jq,
-                        'a_text': a,
-                        'a_jyut': ja,
-                        'questioned': questioned_val,
-                        'correct': correct_val,
-                        '_row': row,
-                    })
+                    self.cards.append(card)
             return True
         except Exception as e:
             print(f"Error loading QA CSV: {e}")

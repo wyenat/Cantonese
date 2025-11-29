@@ -1,10 +1,16 @@
 """Simple QA flashcard app window using the QA data manager and logic."""
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QLabel, QHBoxLayout, QPushButton
+from PyQt5.QtMultimedia import QSound
+import re
+
+# Chinese regex used by the TTS generator
+CHINESE_RE = re.compile(r'[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]+')
 
 from ..common.ui_widgets import InputField, ControlButtons
 from .data_manager_qa import DataManagerQA
 from .card_logic_qa import CardLogicQA
+from pathlib import Path
 
 
 MAX_CARDS = 10
@@ -36,16 +42,31 @@ class FlashcardQAApp(QWidget):
 
         layout = QVBoxLayout()
 
-        self.question_label = QLabel("")
-        self.question_label.setWordWrap(True)
+    # UI contains six input boxes (created below). No separate prompt label.
 
-        self.answer_input = InputField()
-        self.answer_input.returnPressed.connect(self.check)
+        # Create input fields for the six possible keys in CSV order (if available)
+        self.input_fields = {}
+        order = getattr(self.data_manager, 'field_order', ['ChineseQ', 'JyutpingQ', 'EnglishQ', 'ChineseA', 'JyutpingA', 'EnglishA'])
+        for key in order:
+            lbl = QLabel(key + ':')
+            fld = InputField()
+            fld.returnPressed.connect(self.check)
+            h = QHBoxLayout()
+            h.addWidget(lbl)
+            h.addWidget(fld, 1)
+            # If this is a Chinese field, add a listen button
+            if key in ('ChineseQ', 'ChineseA'):
+                btn_listen = QPushButton('Listen')
+                btn_listen.setFixedWidth(90)
+                # play the EXPECTED answer for this key (from current card), not the field text
+                btn_listen.clicked.connect(lambda _checked, k=key: self.play_key_audio(k))
+                h.addWidget(btn_listen)
+                fld._listen_button = btn_listen
+            self.input_fields[key] = (lbl, fld, h)
+            layout.addLayout(h)
 
+        # Buttons
         self.buttons = ControlButtons(on_check_callback=self.check, on_next_callback=self.new_card)
-
-        layout.addWidget(self.question_label)
-        layout.addWidget(self.answer_input)
         layout.addWidget(self.buttons)
 
         self.setLayout(layout)
@@ -63,14 +84,45 @@ class FlashcardQAApp(QWidget):
             return
 
         card = res['card']
-        q_text = card.get('q_text') or card.get('q_jyut') or ''
-        self.question_label.setText(f"Q: {q_text}")
-        self.answer_input.enable()
+        prompt_key = res.get('prompt_key')
+        expected_keys = res.get('expected_keys', [])
+
+        prompt_val = card.get(prompt_key) or ''
+        self.current_prompt_key = prompt_key
+        self.current_expected_keys = expected_keys
+        self.current_prompt_val = prompt_val
+
+        # configure inputs: always show all 6 fields; prefill & disable prompted field
+        for key, (lbl, fld, h) in self.input_fields.items():
+            lbl.show()
+            if key == prompt_key:
+                # pre-fill and grey out
+                fld.disable(prompt_val or '')
+                if hasattr(fld, '_listen_button'):
+                    # prompt listen should play the expected prompt (use prompt_listen_button too)
+                    fld._listen_button.show()
+            else:
+                # reset/enable other fields for answers
+                fld.enable()
+                # ensure input is empty
+                fld.clear()
+                if hasattr(fld, '_listen_button'):
+                    fld._listen_button.show()
+
         self.card_count += 1
 
     def check(self):
-        user = self.answer_input.text().strip()
-        correct, msg = self.card_logic.check_answer(user)
+        # gather user answers for expected keys
+        # use stored expected keys from last new_card
+        current = self.card_logic.current
+        if not current:
+            return
+        expected_keys = getattr(self, 'current_expected_keys', [])
+        user_answers = {}
+        for k in expected_keys:
+            user_answers[k] = self.input_fields[k][1].text().strip()
+
+        correct, msg = self.card_logic.check_answer(user_answers, expected_keys)
         self.data_manager.save_csv()
 
         if correct:
@@ -94,3 +146,66 @@ class FlashcardQAApp(QWidget):
             self.new_card()
         else:
             self.close()
+
+    def safe_name(self, text: str) -> str:
+        # prefer extracting pure Chinese characters (generator uses Chinese-only matches)
+        if not text:
+            return ''
+        m = CHINESE_RE.findall(text)
+        if m:
+            base = ''.join(m)
+        else:
+            base = ''.join(ch if ch.isalnum() else '_' for ch in text)
+        return base
+
+    def get_audio_path_for_text(self, text: str) -> Path:
+        safe = self.safe_name(text)
+        return Path('resources') / 'audio' / f"{safe}.wav"
+
+    def play_field_audio(self, field: InputField):
+        # Deprecated: field playback is not used. Keep for compatibility.
+        text = field.text().strip()
+        if not text:
+            QMessageBox.warning(self, "No Text", "No text to play")
+            return
+        p = self.get_audio_path_for_text(text)
+        if not p.exists():
+            QMessageBox.warning(self, "No Audio", f"Audio not found: {p}")
+            return
+        try:
+            QSound.play(str(p))
+        except Exception as e:
+            QMessageBox.warning(self, "Playback Error", str(e))
+
+    def play_key_audio(self, key: str):
+        """Play the expected answer text for `key` from the current card."""
+        card = getattr(self.card_logic, 'current', None)
+        if not card:
+            QMessageBox.warning(self, "No Card", "No card loaded")
+            return
+        text = (card.get(key) or '').strip()
+        if not text:
+            QMessageBox.warning(self, "No Audio", f"No expected text for {key}")
+            return
+        p = self.get_audio_path_for_text(text)
+        if not p.exists():
+            QMessageBox.warning(self, "No Audio", f"Audio not found: {p}")
+            return
+        try:
+            QSound.play(str(p))
+        except Exception as e:
+            QMessageBox.warning(self, "Playback Error", str(e))
+
+    def play_prompt_audio(self):
+        txt = getattr(self, 'current_prompt_val', '')
+        if not txt:
+            QMessageBox.warning(self, "No Audio", "No prompt audio available")
+            return
+        p = self.get_audio_path_for_text(txt)
+        if not p.exists():
+            QMessageBox.warning(self, "No Audio", f"Audio not found: {p}")
+            return
+        try:
+            QSound.play(str(p))
+        except Exception as e:
+            QMessageBox.warning(self, "Playback Error", str(e))

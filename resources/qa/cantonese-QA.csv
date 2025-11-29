@@ -1,3 +1,4 @@
-ChineseQ,JyutpingQ，EnglishQ,ChineseA,JyutpingA，EnglishA,Questioned,Correct
-你叫咩名？,nei5 giu3 me1 meng2?,What is your name?,我叫Vivien,3,2
-你幾多歲？,nei5 gei2 do1 seoi3?,How old are you?,我二十八歲,2,1
+ChineseQ,JyutpingQ,EnglishQ,ChineseA,JyutpingA,EnglishA,Questioned,Correct
+你叫咩名？,nei5 giu3 me1 meng2?,What is your name?,我叫Vivien,ngo5 giu3 Vivien,I am Vivien,0,0
+你幾多歲？,nei5 gei2 do1 seoi3?,How old are you?,我二十八歲,ngo5 ji6 sap6 baat3 seoi3?,I am 28 years old,0,0
+你住喺邊度？,nei5 zyu6 hai2 bin1 dou6?,Where do you live?,我住喺香港,ngo5 zyu6 hai2 Hoeng1 Gong2,I live in Hong Kong,0,0

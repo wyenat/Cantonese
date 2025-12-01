@@ -1,4 +1,12 @@
 ChineseQ,JyutpingQ,EnglishQ,ChineseA,JyutpingA,EnglishA,Questioned,Correct
 你叫咩名？,nei5 giu3 me1 meng2?,What is your name?,我叫Vivien,ngo5 giu3 Vivien,I am Vivien,0,0
-你幾多歲？,nei5 gei2 do1 seoi3?,How old are you?,我二十八歲,ngo5 ji6 sap6 baat3 seoi3?,I am 28 years old,0,0
+你幾多歲？,nei5 gei2 do1 seoi3?,How old are you?,我二十八歲,ngo5 ji6 sap6 baat3 seoi3,I am 28 years old,0,0
 你住喺邊度？,nei5 zyu6 hai2 bin1 dou6?,Where do you live?,我住喺香港,ngo5 zyu6 hai2 Hoeng1 Gong2,I live in Hong Kong,0,0
+你有咩興趣？,nei5 jau5 me1 hing3 ceoi3?,What are your hobbies?,我嘅興趣係行山,ngo5 ge3 hing3 ceoi3 hai6 haang4 saan1,My hobby is hiking,0,0
+點解你鍾意行山？,dim2 gaai2 nei5 zung1 ji3 haang4 saan1?,Why do you like hiking?,因為我鍾意大自然,jan1 wai6 ngo5 zung1 ji3 daai6 zi6 jin4,Because I like nature,0,0
+你做咩工作？,nei5 zou6 me1 gung1 zok3?,What is your job?,我係資訊科技軟件工程師,ngo5 hai6 zi1 seon3 gei6 suk6 jyun5 gin2 gung1 cing4 si1,I am an IT software engineer,1,0
+你做邊個行業？,nei5 zou6 bin1 go3 hang4 jip6?,What field do you work in?,我做資訊科技,ngo5 zou6 zi1 seon3 gei6 suk6,I work in IT,0,0
+而家幾點？,ji4 gaa1 gei2 dim2?,What time is it?,而家三點半,ji4 gaa1 saam1 dim2 bun3,It's 3:30 pm,0,0
+你喺香港住了幾耐？,nei5 hai2 hoeng1 gong2 zyu6 zo2 gei2 noi6?,How long have you lived in Hong Kong?,我住了五年,ngo5 zyu6 zo2 ng5 nin4,I have lived here for 5 years,1,1
+你生日係幾時？,nei5 saang1 jat6 hai6 gei2 si4?,When is your birthday?,我生日係二月十二號,ngo5 saang1 jat6 hai6 ji6 jyut6 sap6 ji6 hou6,My birthday is February 12th,0,0
+你幾時嚟香港？,nei5 gei2 si4 lei4 hoeng1 gong2?,What year did you arrive in Hong Kong?,我二零二零年嚟咗香港,ngo5 ji6 ling4 ji6 ling4 nin4 lei4 zo2 hoeng1 gong2,I arrived in Hong Kong in 2020,0,0

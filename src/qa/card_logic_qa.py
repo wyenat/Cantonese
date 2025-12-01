@@ -5,10 +5,32 @@ import random
 
 
 class CardLogicQA:
-    def __init__(self, cards: List[Dict[str, Any]]):
+    def __init__(self, cards: List[Dict[str, Any]], prompt_weights: Dict[str, float] = None):
+        """cards: list of card dicts
+
+        prompt_weights: optional mapping of prompt key -> weight (probability coefficient).
+        If not provided, defaults to preferring ChineseQ (weight 1) and zero for others
+        so the prompt will be ChineseQ unless it's empty.
+        """
         self.cards = cards
         self.current = None
         self.current_idx = -1
+
+        # default keys
+        self.keys = ['ChineseQ', 'JyutpingQ', 'EnglishQ', 'ChineseA', 'JyutpingA', 'EnglishA']
+
+        # initialize weights - default: ChineseQ preferred
+        default = {k: (1.0 if k == 'ChineseQ' else 0.0) for k in self.keys}
+        self.prompt_weights = default if prompt_weights is None else {**default, **prompt_weights}
+
+    def set_prompt_weights(self, weights: Dict[str, float]):
+        """Replace or update prompt weights. Accepts partial dict of key->weight."""
+        for k, v in weights.items():
+            if k in self.keys:
+                try:
+                    self.prompt_weights[k] = float(v)
+                except Exception:
+                    pass
     def get_random_card(self) -> Dict[str, Any]:
         """Select a random card and choose one of the six fields as the prompt.
 
@@ -17,14 +39,31 @@ class CardLogicQA:
         if not self.cards:
             return None
 
-        # choose a random card and pick a prompt key that has content
+        # choose a random card (try up to N attempts to find one with content)
         attempts = 0
         while attempts < 10:
             self.current_idx = random.randint(0, len(self.cards) - 1)
             self.current = self.cards[self.current_idx]
-            keys = ['ChineseQ', 'JyutpingQ', 'EnglishQ', 'ChineseA', 'JyutpingA', 'EnglishA']
-            prompt_key = random.choice(keys)
-            if self.current.get(prompt_key):
+            # available keys on this card
+            keys = self.keys
+
+            # build candidate prompt keys preserving configured weights and presence of content
+            candidates = []
+            weights = []
+            for k in keys:
+                if self.current.get(k):
+                    w = float(self.prompt_weights.get(k, 0.0) or 0.0)
+                    if w > 0:
+                        candidates.append(k)
+                        weights.append(w)
+
+            # if no weighted candidates (all weights zero or missing), fall back to any key that has content
+            if not candidates:
+                candidates = [k for k in keys if self.current.get(k)]
+                weights = [1.0] * len(candidates)
+
+            if candidates:
+                prompt_key = random.choices(candidates, weights=weights, k=1)[0]
                 break
             attempts += 1
 
